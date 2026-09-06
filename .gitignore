@@ -1,0 +1,14 @@
+.env
+*.db
+*.sqlite3
+__pycache__/
+.pytest_cache/
+.venv/
+node_modules/
+dist/
+chain/artifacts/
+chain/cache/
+chain/types/
+backend/chain/deployed_address.json
+frontend/src/chain/abi.json
+frontend/*.tsbuildinfo

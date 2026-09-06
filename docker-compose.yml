@@ -1,0 +1,59 @@
+services:
+  hardhat-node:
+    build:
+      context: ./chain
+    ports:
+      - "127.0.0.1:8545:8545"
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:8545',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',method:'eth_chainId',params:[],id:1})}).then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      DATABASE_URL: sqlite+aiosqlite:////data/face_verify.db
+      RPC_URL: http://hardhat-node:8545
+      CHAIN_ARTIFACT_PATH: /workspace/backend/chain/deployed_address.json
+      FACE_MATCH_TOLERANCE: ${FACE_MATCH_TOLERANCE:-0.6}
+      FACE_BACKEND: ${FACE_BACKEND:-auto}
+      FRONTEND_ORIGIN: http://localhost:5173
+      ADMIN_NAME: ${ADMIN_NAME:-Local Administrator}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@faceverify.local}
+      ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH:-}
+    volumes:
+      - face-verify-data:/data
+      - ./backend/seed_images:/workspace/backend/seed_images:ro
+    depends_on:
+      hardhat-node:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8000:8000"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  frontend:
+    build:
+      context: ./frontend
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:5173:80"
+
+volumes:
+  face-verify-data:

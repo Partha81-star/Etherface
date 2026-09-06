@@ -1,0 +1,23 @@
+[
+  {
+    "image": "authorized-post-1.jpg",
+    "caption": "Replace with the caption from your self-owned post.",
+    "author": "Your Name",
+    "source_url": "https://example.com/your-authorized-post-1",
+    "timestamp": "2026-01-15T10:30:00Z"
+  },
+  {
+    "image": "authorized-post-2.jpg",
+    "caption": "A second consented post from the local demo dataset.",
+    "author": "Your Name",
+    "source_url": "https://example.com/your-authorized-post-2",
+    "timestamp": "2026-02-10T14:00:00Z"
+  },
+  {
+    "image": "authorized-post-3.jpg",
+    "caption": "A third consented post from the local demo dataset.",
+    "author": "Your Name",
+    "source_url": "https://example.com/your-authorized-post-3",
+    "timestamp": "2026-03-05T08:15:00Z"
+  }
+]
