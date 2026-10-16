@@ -2,6 +2,21 @@
 set -e
 
 # ---------------------------------------------------------------------------
+# Ensure the SQLite database directory exists (handles Railway volume or
+# any custom DATABASE_URL path like sqlite+aiosqlite:////data/face_verify.db)
+# ---------------------------------------------------------------------------
+DB_URL="${DATABASE_URL:-sqlite+aiosqlite:///./face_verify.db}"
+# Extract the file path: strip the driver prefix up to the 3rd slash
+DB_FILE=$(echo "$DB_URL" | sed 's|.*sqlite[^:]*:///||')
+if [ -n "$DB_FILE" ] && [ "$DB_FILE" != "$DB_URL" ]; then
+  DB_DIR=$(dirname "$DB_FILE")
+  if [ "$DB_DIR" != "." ] && [ "$DB_DIR" != "" ]; then
+    echo "Ensuring database directory exists: $DB_DIR"
+    mkdir -p "$DB_DIR"
+  fi
+fi
+
+# ---------------------------------------------------------------------------
 # Chain deployment (optional) — skipped gracefully if RPC is not reachable.
 # Set SKIP_CHAIN_DEPLOY=1 to bypass entirely (e.g. on Railway without a
 # Hardhat node service).

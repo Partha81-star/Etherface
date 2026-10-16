@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import re
 from collections.abc import AsyncIterator
+from pathlib import Path
 
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
@@ -13,11 +15,21 @@ from sqlalchemy.orm import DeclarativeBase
 from .config import get_settings
 
 
+def _ensure_sqlite_dir(url: str) -> None:
+    """Create parent directories for a SQLite database file if needed."""
+    # Matches sqlite+aiosqlite:////abs/path or sqlite+aiosqlite:///rel/path
+    match = re.match(r"sqlite[^:]*:///(/.+|[^/].+)", url)
+    if match:
+        db_path = Path(match.group(1))
+        db_path.parent.mkdir(parents=True, exist_ok=True)
+
+
 class Base(DeclarativeBase):
     pass
 
 
 settings = get_settings()
+_ensure_sqlite_dir(settings.database_url)
 engine = create_async_engine(settings.database_url, future=True)
 SessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 
